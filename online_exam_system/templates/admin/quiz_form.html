@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}{% if quiz %}Edit Quiz{% else %}Create New Quiz{% endif %} - ExamPortal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+          <div>
+            <h3 class="fw-bold mb-1">{% if quiz %}Edit Quiz{% else %}Create New Assessment{% endif %}</h3>
+            <p class="text-muted small mb-0">Configure exam parameters, time limits, and passing criteria</p>
+          </div>
+          <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i> Dashboard
+          </a>
+        </div>
+
+        <form method="POST">
+          <div class="mb-3">
+            <label for="title" class="form-label fw-semibold">Quiz Title <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="title" name="title" required
+                   value="{{ quiz.title if quiz else '' }}"
+                   placeholder="e.g. Python Programming Core Assessment">
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="category" class="form-label fw-semibold">Category / Subject</label>
+              <input type="text" class="form-control" id="category" name="category" list="categoryOptions"
+                     value="{{ quiz.category if quiz else 'Programming' }}"
+                     placeholder="Select or type category">
+              <datalist id="categoryOptions">
+                <option value="Programming">
+                <option value="Web Development">
+                <option value="Database & SQL">
+                <option value="Aptitude & Reasoning">
+                <option value="Machine Learning">
+                <option value="General Science">
+              </datalist>
+            </div>
+
+            <div class="col-md-6">
+              <label for="duration_minutes" class="form-label fw-semibold">Duration (Minutes) <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="duration_minutes" name="duration_minutes" min="1" max="180" required
+                       value="{{ quiz.duration_minutes if quiz else 15 }}">
+                <span class="input-group-text">mins</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label fw-semibold">Description / Syllabus Overview</label>
+            <textarea class="form-control" id="description" name="description" rows="3"
+                      placeholder="Brief summary of topics covered in this quiz...">{{ quiz.description if quiz else '' }}</textarea>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label for="passing_percentage" class="form-label fw-semibold">Passing Threshold (%) <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="passing_percentage" name="passing_percentage" min="1" max="100" required
+                       value="{{ quiz.passing_percentage if quiz else 50 }}">
+                <span class="input-group-text">%</span>
+              </div>
+              <small class="text-muted">Minimum percentage required to award a pass & certificate</small>
+            </div>
+
+            <div class="col-md-6 d-flex align-items-center pt-3">
+              <div class="form-check form-switch fs-5">
+                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1"
+                       {% if not quiz or quiz.is_active == 1 %}checked{% endif %}>
+                <label class="form-check-label fs-6 fw-semibold" for="is_active">
+                  Publish Quiz Immediately (Active)
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 border-top pt-3">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary fw-semibold px-4">
+              <i class="fas fa-save me-1"></i> {% if quiz %}Update Quiz{% else %}Save & Add Questions{% endif %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

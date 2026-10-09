@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Taking Exam - {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-2">
+  
+  <!-- Anti-Cheat Proctoring Alert Banner (Triggers on tab switch) -->
+  <div id="antiCheatWarning" class="alert alert-danger d-none shadow-sm d-flex align-items-center mb-3">
+    <i class="fas fa-shield-virus fs-3 me-3 text-danger"></i>
+    <div>
+      <strong>Proctor Warning!</strong> Window blur or tab switch detected (<span id="switchWarningCount" class="fw-bold">1</span> time). Please stay on this tab until your exam is submitted.
+    </div>
+  </div>
+
+  <!-- Sticky Exam Header -->
+  <div class="card p-3 mb-4 exam-header shadow-sm border-0">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h4 class="fw-bold mb-0 text-dark">{{ quiz.title }}</h4>
+        <span class="text-muted small">
+          <i class="fas fa-tasks text-primary me-1"></i> Total {{ questions|length }} Questions &bull;
+          <span class="badge bg-secondary">{{ quiz.category }}</span>
+        </span>
+      </div>
+
+      <!-- Live Countdown Timer -->
+      <div class="d-flex align-items-center gap-3">
+        <div class="text-end">
+          <div class="small text-muted text-uppercase fw-bold">Time Left</div>
+          <div id="timerDisplay" class="timer-badge text-primary">00:00</div>
+        </div>
+        <div class="bg-primary bg-opacity-10 p-2 rounded-circle text-primary fs-3">
+          <i class="fas fa-stopwatch"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="mt-3">
+      <div class="d-flex justify-content-between small text-muted mb-1">
+        <span>Progress: <strong id="answeredCount">0</strong> / {{ questions|length }} Answered</span>
+        <span>Candidate: <strong>{{ session.get('full_name') }}</strong></span>
+      </div>
+      <div class="progress" style="height: 6px;">
+        <div id="examProgressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Exam Form -->
+  <form id="examForm" method="POST" action="{{ url_for('submit_exam', quiz_id=quiz.id) }}"
+        data-total-questions="{{ questions|length }}"
+        data-duration-minutes="{{ quiz.duration_minutes }}">
+    
+    <input type="hidden" name="time_spent_seconds" id="timeSpentInput" value="0">
+
+    <div class="row g-4">
+      
+      <!-- Questions Center Stage -->
+      <div class="col-lg-8">
+        {% for q in questions %}
+        <div id="question-pane-{{ loop.index }}" class="question-pane card shadow-sm p-4 {% if not loop.first %}d-none{% endif %}">
+          <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+            <span class="badge bg-primary fs-6">Question {{ loop.index }} of {{ questions|length }}</span>
+            <span class="badge bg-light text-dark border"><i class="fas fa-award text-warning me-1"></i>{{ q.marks }} Mark(s)</span>
+          </div>
+
+          <!-- Question Prompt -->
+          <h5 class="fw-bold mb-4 text-dark lh-base">{{ q.question_text }}</h5>
+
+          <!-- Multiple Choice Options -->
+          <div class="d-flex flex-column gap-3 mb-4">
+            <!-- Option A -->
+            <div>
+              <input type="radio" class="btn-check option-input" name="question_{{ q.id }}" id="opt_{{ q.id }}_A" value="A">
+              <label class="option-label" for="opt_{{ q.id }}_A">
+                <span class="badge bg-secondary me-2">A</span> {{ q.option_a }}
+              </label>
+            </div>
+
+            <!-- Option B -->
+            <div>
+              <input type="radio" class="btn-check option-input" name="question_{{ q.id }}" id="opt_{{ q.id }}_B" value="B">
+              <label class="option-label" for="opt_{{ q.id }}_B">
+                <span class="badge bg-secondary me-2">B</span> {{ q.option_b }}
+              </label>
+            </div>
+
+            <!-- Option C -->
+            <div>
+              <input type="radio" class="btn-check option-input" name="question_{{ q.id }}" id="opt_{{ q.id }}_C" value="C">
+              <label class="option-label" for="opt_{{ q.id }}_C">
+                <span class="badge bg-secondary me-2">C</span> {{ q.option_c }}
+              </label>
+            </div>
+
+            <!-- Option D -->
+            <div>
+              <input type="radio" class="btn-check option-input" name="question_{{ q.id }}" id="opt_{{ q.id }}_D" value="D">
+              <label class="option-label" for="opt_{{ q.id }}_D">
+                <span class="badge bg-secondary me-2">D</span> {{ q.option_d }}
+              </label>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+        <!-- Navigation Bar Below Question -->
+        <div class="card p-3 shadow-sm border-0 mt-3 d-flex flex-row justify-content-between align-items-center flex-wrap gap-2">
+          <button type="button" id="prevQuestionBtn" class="btn btn-outline-secondary" disabled>
+            <i class="fas fa-arrow-left me-1"></i> Previous
+          </button>
+
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="markReviewCheckbox">
+            <label class="form-check-label fw-semibold text-warning" for="markReviewCheckbox">
+              <i class="fas fa-flag me-1"></i> Mark for Review
+            </label>
+          </div>
+
+          <button type="button" id="nextQuestionBtn" class="btn btn-primary">
+            Next Question <i class="fas fa-arrow-right ms-1"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Sidebar: Question Palette & Submission -->
+      <div class="col-lg-4">
+        <div class="card p-4 shadow-sm border-0 sticky-top" style="top: 90px;">
+          <h5 class="fw-bold mb-3"><i class="fas fa-th-large text-primary me-2"></i>Question Palette</h5>
+          <p class="small text-muted mb-3">Click on any question number below to jump directly to it.</p>
+
+          <div class="palette-grid mb-4">
+            {% for q in questions %}
+            <button type="button" id="palette-btn-{{ loop.index }}"
+                    class="palette-btn btn btn-outline-secondary"
+                    data-index="{{ loop.index }}"
+                    data-question-id="{{ q.id }}">
+              {{ loop.index }}
+            </button>
+            {% endfor %}
+          </div>
+
+          <!-- Palette Legend -->
+          <div class="border-top pt-3 mb-4">
+            <div class="small fw-bold text-muted mb-2">STATUS LEGEND:</div>
+            <div class="d-flex flex-column gap-2 small">
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success p-2"> </span>
+                <span>Answered</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-warning text-dark p-2"> </span>
+                <span>Marked for Review</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-outline-secondary border p-2"> </span>
+                <span>Not Answered</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Exam Section -->
+          <div id="examSubmitSection" class="border-top pt-3">
+            <button type="button" class="btn btn-danger w-100 py-2 fw-bold" data-bs-toggle="modal" data-bs-target="#confirmSubmitModal">
+              <i class="fas fa-check-circle me-1"></i> Submit Examination
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Submission Confirmation Modal -->
+    <div class="modal fade" id="confirmSubmitModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold"><i class="fas fa-question-circle text-warning me-2"></i>Confirm Final Submission</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to finish and submit your exam? Once submitted, your answers will be graded immediately and cannot be modified.</p>
+            <div class="alert alert-info py-2 small mb-0">
+              <i class="fas fa-info-circle me-1"></i> You will instantly receive your scorecard and question explanations.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel & Continue Exam</button>
+            <button type="submit" class="btn btn-danger fw-bold px-4">Yes, Submit Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/exam.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - ExamPortal{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <!-- Header & Actions -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="fw-bold mb-1">Instructor & Admin Control Center</h2>
+      <p class="text-muted mb-0">Manage quizzes, configure questions, and review candidate performances.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('admin_create_quiz') }}" class="btn btn-primary fw-semibold">
+        <i class="fas fa-plus-circle me-1"></i> Create New Quiz
+      </a>
+      <a href="{{ url_for('admin_results') }}" class="btn btn-outline-dark fw-semibold">
+        <i class="fas fa-poll me-1"></i> All Results
+      </a>
+      <a href="{{ url_for('admin_change_password') }}" class="btn btn-warning text-dark fw-bold shadow-sm">
+        <i class="fas fa-key me-1"></i> Change Password
+      </a>
+    </div>
+  </div>
+
+  <!-- Key Metrics Row -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card p-3 stat-card shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-bold">Total Quizzes</div>
+            <div class="fs-3 fw-bold">{{ total_quizzes }}</div>
+          </div>
+          <div class="fs-2 text-primary"><i class="fas fa-book"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card p-3 stat-card success shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-bold">Students Registered</div>
+            <div class="fs-3 fw-bold text-success">{{ total_students }}</div>
+          </div>
+          <div class="fs-2 text-success"><i class="fas fa-users"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card p-3 stat-card warning shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-bold">Total Submissions</div>
+            <div class="fs-3 fw-bold text-warning">{{ total_attempts }}</div>
+          </div>
+          <div class="fs-2 text-warning"><i class="fas fa-clipboard-check"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card p-3 stat-card danger shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-bold">Average Score</div>
+            <div class="fs-3 fw-bold text-danger">{{ avg_score }}%</div>
+          </div>
+          <div class="fs-2 text-danger"><i class="fas fa-chart-pie"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quizzes Table -->
+  <div class="card shadow-sm border-0 mb-5">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0"><i class="fas fa-list-alt text-primary me-2"></i>Assessment Repository</h5>
+      <span class="badge bg-secondary">{{ quizzes|length }} Quizzes</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Quiz Title</th>
+            <th>Category</th>
+            <th>Duration</th>
+            <th>Questions</th>
+            <th>Pass %</th>
+            <th>Attempts</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for q in quizzes %}
+          <tr>
+            <td>
+              <div class="fw-bold text-dark">{{ q.title }}</div>
+              <small class="text-muted">{{ q.description[:60] }}{% if q.description|length > 60 %}...{% endif %}</small>
+            </td>
+            <td><span class="badge bg-light text-dark border">{{ q.category }}</span></td>
+            <td>{{ q.duration_minutes }} mins</td>
+            <td>
+              <span class="badge bg-primary">{{ q.question_count }} Qs</span>
+              <small class="text-muted ms-1">({{ q.total_marks }} pts)</small>
+            </td>
+            <td>{{ q.passing_percentage }}%</td>
+            <td><strong>{{ q.attempt_count }}</strong></td>
+            <td>
+              {% if q.is_active == 1 %}
+                <span class="badge bg-success">Active</span>
+              {% else %}
+                <span class="badge bg-secondary">Draft / Inactive</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <a href="{{ url_for('admin_quiz_questions', quiz_id=q.id) }}" class="btn btn-outline-primary" title="Manage Questions">
+                  <i class="fas fa-tasks"></i> Questions
+                </a>
+                <a href="{{ url_for('admin_edit_quiz', quiz_id=q.id) }}" class="btn btn-outline-secondary" title="Edit Quiz Settings">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <form method="POST" action="{{ url_for('admin_toggle_quiz', quiz_id=q.id) }}" class="d-inline">
+                  <button type="submit" class="btn btn-outline-info" title="Toggle Active/Inactive">
+                    <i class="fas fa-power-off"></i>
+                  </button>
+                </form>
+                <form method="POST" action="{{ url_for('admin_delete_quiz', quiz_id=q.id) }}" class="d-inline" onsubmit="return confirm('Delete this quiz and all its questions/results?');">
+                  <button type="submit" class="btn btn-outline-danger" title="Delete Quiz">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="8" class="text-center text-muted py-4">
+              No quizzes created yet. Click "Create New Quiz" to get started.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recent Submissions Overview -->
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0"><i class="fas fa-history text-secondary me-2"></i>Latest Student Submissions</h5>
+      <a href="{{ url_for('admin_results') }}" class="small fw-semibold text-primary">View All &rarr;</a>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Student</th>
+            <th>Exam Title</th>
+            <th>Score</th>
+            <th>Percentage</th>
+            <th>Result</th>
+            <th>Submitted At</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in recent_attempts %}
+          <tr>
+            <td>
+              <div class="fw-semibold">{{ a.full_name }}</div>
+              <small class="text-muted">{{ a.email }}</small>
+            </td>
+            <td>{{ a.quiz_title }}</td>
+            <td>{{ a.score }} / {{ a.total_marks }}</td>
+            <td class="fw-bold {% if a.passed %}text-success{% else %}text-danger{% endif %}">{{ a.percentage }}%</td>
+            <td>
+              {% if a.passed %}
+                <span class="badge bg-success">Passed</span>
+              {% else %}
+                <span class="badge bg-danger">Failed</span>
+              {% endif %}
+            </td>
+            <td class="small text-muted">{{ a.submitted_at }}</td>
+            <td class="text-end">
+              <a href="{{ url_for('exam_result', attempt_id=a.id) }}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-eye"></i> Details
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">No recent attempts recorded yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

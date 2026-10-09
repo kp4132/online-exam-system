@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - ExamPortal{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <!-- Welcome Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="fw-bold mb-1">Student Portal</h2>
+      <p class="text-muted mb-0">Welcome, <strong>{{ session.get('full_name') }}</strong>! Select an assessment to start or review your past attempts.</p>
+    </div>
+    <span class="badge bg-primary fs-6 px-3 py-2"><i class="fas fa-id-badge me-1"></i> Candidate</span>
+  </div>
+
+  <!-- Performance Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-4">
+      <div class="card p-3 stat-card shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-bold">Exams Attempted</div>
+            <div class="fs-3 fw-bold">{{ total_taken }}</div>
+          </div>
+          <div class="fs-2 text-primary"><i class="fas fa-file-signature"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+      <div class="card p-3 stat-card success shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-bold">Assessments Passed</div>
+            <div class="fs-3 fw-bold text-success">{{ passed_count }}</div>
+          </div>
+          <div class="fs-2 text-success"><i class="fas fa-check-circle"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+      <div class="card p-3 stat-card warning shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-bold">Average Score</div>
+            <div class="fs-3 fw-bold text-warning">{{ avg_score }}%</div>
+          </div>
+          <div class="fs-2 text-warning"><i class="fas fa-chart-line"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Available Quizzes Section -->
+  <div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="fw-bold mb-0"><i class="fas fa-layer-group text-primary me-2"></i>Available Quizzes & Exams</h4>
+      <span class="text-muted small">{{ quizzes|length }} active test(s) available</span>
+    </div>
+
+    <div class="row g-4">
+      {% for quiz in quizzes %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 card-hover shadow-sm d-flex flex-column">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge bg-secondary bg-opacity-10 text-secondary fw-semibold">
+                {{ quiz.category }}
+              </span>
+              <span class="badge bg-light text-dark border">
+                <i class="far fa-clock me-1 text-primary"></i> {{ quiz.duration_minutes }} Mins
+              </span>
+            </div>
+            <h5 class="card-title fw-bold text-dark mb-2">{{ quiz.title }}</h5>
+            <p class="card-text text-muted small mb-3">
+              {{ quiz.description or "No description provided." }}
+            </p>
+            <div class="d-flex gap-3 text-muted small border-top pt-2">
+              <div><i class="fas fa-question-circle text-primary me-1"></i><strong>{{ quiz.total_questions }}</strong> Qs</div>
+              <div><i class="fas fa-star text-warning me-1"></i><strong>{{ quiz.total_marks or 0 }}</strong> Marks</div>
+              <div><i class="fas fa-percentage text-success me-1"></i>Pass: <strong>{{ quiz.passing_percentage }}%</strong></div>
+            </div>
+          </div>
+          <div class="card-footer bg-white border-0 pt-0 pb-3">
+            <a href="{{ url_for('exam_instructions', quiz_id=quiz.id) }}" class="btn btn-primary w-100 fw-semibold">
+              <i class="fas fa-play me-1"></i> Start Assessment
+            </a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12">
+        <div class="alert alert-info text-center py-4">
+          <i class="fas fa-info-circle fs-3 mb-2 d-block"></i>
+          There are currently no active exams available. Please check back later.
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Past Exam Attempts Section -->
+  <div>
+    <h4 class="fw-bold mb-3"><i class="fas fa-history text-secondary me-2"></i>My Exam History & Results</h4>
+    
+    <div class="card shadow-sm border-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Date & Time</th>
+              <th>Exam Name</th>
+              <th>Score</th>
+              <th>Percentage</th>
+              <th>Status</th>
+              <th>Time Spent</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in attempts %}
+            <tr>
+              <td class="small text-muted">{{ a.submitted_at }}</td>
+              <td class="fw-semibold">{{ a.quiz_title }}</td>
+              <td>{{ a.score }} / {{ a.total_marks }}</td>
+              <td>
+                <span class="fw-bold {% if a.passed %}text-success{% else %}text-danger{% endif %}">
+                  {{ a.percentage }}%
+                </span>
+              </td>
+              <td>
+                {% if a.passed %}
+                  <span class="badge bg-success"><i class="fas fa-check me-1"></i> PASSED</span>
+                {% else %}
+                  <span class="badge bg-danger"><i class="fas fa-times me-1"></i> FAILED</span>
+                {% endif %}
+              </td>
+              <td class="small text-muted">
+                {{ (a.time_spent_seconds // 60) }}m {{ (a.time_spent_seconds % 60) }}s
+              </td>
+              <td class="text-end">
+                <a href="{{ url_for('exam_result', attempt_id=a.id) }}" class="btn btn-sm btn-outline-primary me-1">
+                  <i class="fas fa-eye me-1"></i> Review
+                </a>
+                {% if a.passed %}
+                <a href="{{ url_for('certificate', attempt_id=a.id) }}" class="btn btn-sm btn-warning text-dark fw-semibold" target="_blank">
+                  <i class="fas fa-certificate me-1"></i> Certificate
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">
+                You haven't attempted any exams yet. Pick an exam above to get started!
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

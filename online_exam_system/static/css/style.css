@@ -1,0 +1,210 @@
+/* Online Exam & Quiz System - Custom CSS Stylesheet */
+
+:root {
+  --primary-color: #4f46e5;
+  --primary-hover: #4338ca;
+  --secondary-color: #06b6d4;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+  --warning-color: #f59e0b;
+  --dark-bg: #0f172a;
+  --card-bg: #ffffff;
+  --body-bg: #f8fafc;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  background-color: var(--body-bg);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Navbar */
+.navbar-custom {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Hero Section */
+.hero-gradient {
+  background: linear-gradient(135deg, #4338ca 0%, #6366f1 50%, #38bdf8 100%);
+  color: white;
+  border-radius: 1rem;
+}
+
+/* Card Enhancements */
+.card {
+  border: 1px solid var(--border-color);
+  border-radius: 0.85rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+}
+
+/* Custom Buttons */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  font-weight: 500;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.25rem;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+/* Stat Cards */
+.stat-card {
+  border-left: 4px solid var(--primary-color);
+}
+.stat-card.success {
+  border-left-color: var(--success-color);
+}
+.stat-card.warning {
+  border-left-color: var(--warning-color);
+}
+.stat-card.danger {
+  border-left-color: var(--danger-color);
+}
+
+/* Exam Screen Elements */
+.exam-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #ffffff;
+  border-bottom: 2px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.timer-badge {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.timer-warning {
+  color: #ef4444 !important;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.06); }
+}
+
+/* Question Option Selection */
+.option-label {
+  display: block;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--border-color);
+  border-radius: 0.65rem;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  background-color: #ffffff;
+}
+
+.option-label:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.option-input:checked + .option-label {
+  background-color: #eef2ff;
+  border-color: var(--primary-color);
+  color: #312e81;
+  font-weight: 600;
+  box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+/* Question Palette */
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+  gap: 8px;
+}
+
+.palette-btn {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.palette-btn.current {
+  outline: 3px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* Certificate Styles */
+.certificate-frame {
+  background: #fff;
+  border: 12px solid #312e81;
+  padding: 40px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.certificate-inner {
+  border: 2px dashed #d97706;
+  padding: 30px;
+  text-align: center;
+}
+
+.certificate-title {
+  font-family: 'Georgia', serif;
+  font-size: 2.4rem;
+  color: #1e1b4b;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.certificate-name {
+  font-family: 'Georgia', serif;
+  font-size: 2.2rem;
+  color: #4338ca;
+  border-bottom: 2px solid #cbd5e1;
+  display: inline-block;
+  padding: 0 20px;
+}
+
+/* Print Rules */
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .certificate-frame {
+    border-width: 8px !important;
+    box-shadow: none !important;
+  }
+}

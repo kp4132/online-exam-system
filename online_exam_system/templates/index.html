@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Online Exam & Quiz System{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <!-- Hero Section -->
+  <div class="p-5 mb-4 hero-gradient text-white shadow-lg">
+    <div class="container-fluid py-4 text-center">
+      <div class="badge bg-white text-primary px-3 py-2 rounded-pill fw-bold mb-3 shadow-sm">
+        <i class="fas fa-sparkles text-warning me-1"></i> Smart Academic Assessment Platform
+      </div>
+      <h1 class="display-4 fw-bold mb-3">Online Exam & Quiz System</h1>
+      <p class="fs-5 col-md-8 mx-auto mb-4 text-white-50">
+        A complete, secure, and responsive web-based examination platform with real-time countdown timer, instant grading, automated performance analytics, and printable certificates.
+      </p>
+      <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="{{ url_for('login') }}" class="btn btn-warning btn-lg text-dark fw-bold px-4 shadow">
+          <i class="fas fa-arrow-right-to-bracket me-2"></i> Student Login
+        </a>
+        <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg fw-semibold px-4">
+          <i class="fas fa-user-shield me-2"></i> Admin Login
+        </a>
+        <a href="{{ url_for('demo_login', role='student') }}" class="btn btn-light btn-lg fw-semibold px-4">
+          <i class="fas fa-user-graduate me-2"></i> Demo Student
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Features Grid -->
+  <div class="row g-4 py-3">
+    <div class="col-md-4">
+      <div class="card h-100 card-hover p-4 text-center">
+        <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mx-auto mb-3" style="width: 64px; height: 64px;">
+          <i class="fas fa-stopwatch fs-3"></i>
+        </div>
+        <h4 class="fw-bold">Timed Exam Engine</h4>
+        <p class="text-muted">
+          Auto-submitting countdown timer, interactive question palette, "Mark for Review" status, and anti-cheat tab-switching detection.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 card-hover p-4 text-center">
+        <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mx-auto mb-3" style="width: 64px; height: 64px;">
+          <i class="fas fa-chart-pie fs-3"></i>
+        </div>
+        <h4 class="fw-bold">Instant Grading & Review</h4>
+        <p class="text-muted">
+          Immediate scorecards with percentage calculation, pass/fail badges, and question-by-question explanations for deeper learning.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 card-hover p-4 text-center">
+        <div class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle mx-auto mb-3" style="width: 64px; height: 64px;">
+          <i class="fas fa-award fs-3"></i>
+        </div>
+        <h4 class="fw-bold">Certified & Analytics</h4>
+        <p class="text-muted">
+          Printable certificates for passing students alongside rich administrator analytics, quiz creator, and student leaderboards.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Credential Showcase -->
+  <div class="card bg-light border-0 mt-3 p-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h5 class="fw-bold mb-1"><i class="fas fa-shield-alt text-primary me-2"></i>Account Access:</h5>
+        <p class="text-muted mb-0 small">
+          <strong>Student Quick Login:</strong> <code>student@exam.com</code> / <code>student123</code> &bull;
+          <strong>Admin:</strong> Private Password Protected <span class="badge bg-danger ms-1">Single Active Login</span>
+        </p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{{ url_for('login') }}" class="btn btn-primary">Sign In</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

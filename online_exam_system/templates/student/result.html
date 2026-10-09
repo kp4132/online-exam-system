@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Exam Results - {{ attempt.quiz_title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  
+  <!-- Scorecard Banner -->
+  <div class="card shadow border-0 overflow-hidden mb-4">
+    <div class="p-4 text-center {% if attempt.passed %}bg-success{% else %}bg-danger{% endif %} text-white">
+      <div class="mb-2">
+        {% if attempt.passed %}
+          <i class="fas fa-trophy fs-1 text-warning"></i>
+        {% else %}
+          <i class="fas fa-times-circle fs-1 text-white"></i>
+        {% endif %}
+      </div>
+      <h2 class="fw-bold mb-1">
+        {% if attempt.passed %}Congratulations, You Passed!{% else %}Assessment Completed{% endif %}
+      </h2>
+      <p class="mb-0 text-white-50">{{ attempt.quiz_title }} &bull; Candidate: {{ attempt.full_name }}</p>
+    </div>
+
+    <div class="card-body p-4">
+      <div class="row g-4 text-center align-items-center">
+        <!-- Percentage Dial -->
+        <div class="col-md-4 border-end">
+          <div class="display-3 fw-bold {% if attempt.passed %}text-success{% else %}text-danger{% endif %} mb-0">
+            {{ attempt.percentage }}%
+          </div>
+          <div class="text-muted small text-uppercase fw-semibold">Overall Percentage</div>
+          <div class="mt-2">
+            {% if attempt.passed %}
+              <span class="badge bg-success fs-6 px-3 py-1">PASSED (Required: {{ attempt.passing_percentage }}%)</span>
+            {% else %}
+              <span class="badge bg-danger fs-6 px-3 py-1">FAILED (Required: {{ attempt.passing_percentage }}%)</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Breakdown Numbers -->
+        <div class="col-md-8">
+          <div class="row g-3">
+            <div class="col-sm-3 col-6">
+              <div class="p-2 border rounded">
+                <div class="text-muted small">Score</div>
+                <div class="fs-4 fw-bold text-dark">{{ attempt.score }} / {{ attempt.total_marks }}</div>
+              </div>
+            </div>
+            <div class="col-sm-3 col-6">
+              <div class="p-2 border rounded">
+                <div class="text-muted small">Correct</div>
+                <div class="fs-4 fw-bold text-success">{{ correct_count }}</div>
+              </div>
+            </div>
+            <div class="col-sm-3 col-6">
+              <div class="p-2 border rounded">
+                <div class="text-muted small">Incorrect</div>
+                <div class="fs-4 fw-bold text-danger">{{ incorrect_count }}</div>
+              </div>
+            </div>
+            <div class="col-sm-3 col-6">
+              <div class="p-2 border rounded">
+                <div class="text-muted small">Unanswered</div>
+                <div class="fs-4 fw-bold text-warning">{{ unattempted_count }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-3 text-muted small px-2">
+            <span><i class="far fa-clock me-1"></i> Time Spent: <strong>{{ attempt.time_spent_seconds // 60 }}m {{ attempt.time_spent_seconds % 60 }}s</strong></span>
+            <span><i class="far fa-calendar-alt me-1"></i> Date: <strong>{{ attempt.submitted_at }}</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="d-flex justify-content-center gap-3 mt-4 pt-3 border-top flex-wrap">
+        <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">
+          <i class="fas fa-arrow-left me-1"></i> Dashboard
+        </a>
+        {% if attempt.passed %}
+        <a href="{{ url_for('certificate', attempt_id=attempt.id) }}" target="_blank" class="btn btn-warning text-dark fw-bold px-4 shadow-sm">
+          <i class="fas fa-certificate me-2"></i> View & Print Certificate
+        </a>
+        {% endif %}
+        <a href="{{ url_for('exam_instructions', quiz_id=attempt.quiz_id) }}" class="btn btn-primary fw-semibold">
+          <i class="fas fa-redo me-1"></i> Retake Exam
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Review of Answers -->
+  <div class="card shadow-sm border-0 p-4 mb-4">
+    <h4 class="fw-bold mb-3"><i class="fas fa-list-check text-primary me-2"></i>Detailed Question & Answer Review</h4>
+    <p class="text-muted small mb-4">Review each question, your selected option, the correct option, and detailed explanations.</p>
+
+    <div class="d-flex flex-column gap-4">
+      {% for item in detailed_review %}
+      {% set q = item.question %}
+      <div class="card border {% if item.status == 'correct' %}border-success{% elif item.status == 'wrong' %}border-danger{% else %}border-warning{% endif %} p-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="fw-bold text-muted small">Question {{ loop.index }} ({{ q.marks }} Marks)</span>
+          <div>
+            {% if item.status == 'correct' %}
+              <span class="badge bg-success"><i class="fas fa-check me-1"></i> Correct</span>
+            {% elif item.status == 'wrong' %}
+              <span class="badge bg-danger"><i class="fas fa-times me-1"></i> Incorrect</span>
+            {% else %}
+              <span class="badge bg-warning text-dark"><i class="fas fa-minus-circle me-1"></i> Skipped</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <h6 class="fw-bold mb-3 text-dark">{{ q.question_text }}</h6>
+
+        <!-- Options List -->
+        <div class="row g-2 mb-3">
+          <div class="col-md-6">
+            <div class="p-2 rounded small border {% if q.correct_option == 'A' %}bg-success bg-opacity-10 border-success fw-bold text-success{% elif item.user_choice == 'A' and not item.is_correct %}bg-danger bg-opacity-10 border-danger text-danger{% endif %}">
+              <strong>A:</strong> {{ q.option_a }}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-2 rounded small border {% if q.correct_option == 'B' %}bg-success bg-opacity-10 border-success fw-bold text-success{% elif item.user_choice == 'B' and not item.is_correct %}bg-danger bg-opacity-10 border-danger text-danger{% endif %}">
+              <strong>B:</strong> {{ q.option_b }}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-2 rounded small border {% if q.correct_option == 'C' %}bg-success bg-opacity-10 border-success fw-bold text-success{% elif item.user_choice == 'C' and not item.is_correct %}bg-danger bg-opacity-10 border-danger text-danger{% endif %}">
+              <strong>C:</strong> {{ q.option_c }}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-2 rounded small border {% if q.correct_option == 'D' %}bg-success bg-opacity-10 border-success fw-bold text-success{% elif item.user_choice == 'D' and not item.is_correct %}bg-danger bg-opacity-10 border-danger text-danger{% endif %}">
+              <strong>D:</strong> {{ q.option_d }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Explanation Alert -->
+        {% if q.explanation %}
+        <div class="alert alert-light border small mb-0">
+          <strong class="text-primary"><i class="fas fa-lightbulb me-1"></i> Explanation:</strong>
+          {{ q.explanation }}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

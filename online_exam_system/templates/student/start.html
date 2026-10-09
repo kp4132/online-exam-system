@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Exam Instructions - {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow p-4">
+        <!-- Header -->
+        <div class="border-bottom pb-3 mb-4">
+          <span class="badge bg-primary text-uppercase px-3 py-2 mb-2">{{ quiz.category }}</span>
+          <h2 class="fw-bold mb-1">{{ quiz.title }}</h2>
+          <p class="text-muted">{{ quiz.description }}</p>
+        </div>
+
+        <!-- Exam Parameters -->
+        <div class="row g-3 mb-4 text-center">
+          <div class="col-sm-3 col-6">
+            <div class="bg-light p-3 rounded">
+              <div class="text-muted small">Duration</div>
+              <div class="fs-4 fw-bold text-primary">{{ quiz.duration_minutes }} Min</div>
+            </div>
+          </div>
+          <div class="col-sm-3 col-6">
+            <div class="bg-light p-3 rounded">
+              <div class="text-muted small">Questions</div>
+              <div class="fs-4 fw-bold text-dark">{{ total_questions }}</div>
+            </div>
+          </div>
+          <div class="col-sm-3 col-6">
+            <div class="bg-light p-3 rounded">
+              <div class="text-muted small">Total Marks</div>
+              <div class="fs-4 fw-bold text-dark">{{ total_marks }}</div>
+            </div>
+          </div>
+          <div class="col-sm-3 col-6">
+            <div class="bg-light p-3 rounded">
+              <div class="text-muted small">Passing Score</div>
+              <div class="fs-4 fw-bold text-success">{{ quiz.passing_percentage }}%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Instructions & Guidelines -->
+        <div class="card bg-light border-0 p-3 mb-4">
+          <h5 class="fw-bold mb-3"><i class="fas fa-clipboard-list text-primary me-2"></i>Assessment Rules & Guidelines:</h5>
+          <ul class="list-unstyled mb-0 d-flex flex-column gap-2 text-secondary">
+            <li><i class="fas fa-check-circle text-success me-2"></i><strong>Timed Test:</strong> Once you click "Begin Exam", the timer begins immediately and cannot be paused.</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i><strong>Auto-Submission:</strong> If the timer expires before you submit, your answered questions will be automatically submitted.</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i><strong>Palette Navigation:</strong> You can jump between questions and change your answers at any point during the allotted duration.</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i><strong>Review Feature:</strong> Use the "Mark for Review" flag to bookmark questions you want to double-check before submitting.</li>
+            <li><i class="fas fa-exclamation-triangle text-warning me-2"></i><strong>Anti-Cheat Notice:</strong> Switching browser tabs or minimizing the window will trigger a proctor warning log.</li>
+          </ul>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center">
+          <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Return to Dashboard
+          </a>
+          <a href="{{ url_for('take_exam', quiz_id=quiz.id) }}" class="btn btn-success btn-lg fw-bold px-4">
+            <i class="fas fa-play me-2"></i> I Understand, Begin Exam
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
